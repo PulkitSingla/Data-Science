@@ -32,7 +32,7 @@ def load_data():
 df = load_data()
 sector = df.groupby('GICS Sector')
 
-# Sidebar - Sector selection
+
 sorted_sector_unique = sorted(df['GICS Sector'].unique())
 selected_sector = st.sidebar.multiselect(
     'Sector', sorted_sector_unique, sorted_sector_unique)
@@ -45,8 +45,7 @@ st.write('Data Dimension: ' + str(df_selected_sector.shape[0]) + ' rows and ' + 
     df_selected_sector.shape[1]) + ' columns.')
 st.dataframe(df_selected_sector)
 
-# Download S&P500 data
-# https://discuss.streamlit.io/t/how-to-download-file-in-streamlit/1806
+
 
 
 def filedownload(df):
@@ -59,7 +58,7 @@ def filedownload(df):
 
 st.markdown(filedownload(df_selected_sector), unsafe_allow_html=True)
 
-# https://pypi.org/project/yfinance/
+
 
 data = yf.download(
     tickers=list(df_selected_sector[:10].Symbol),
@@ -72,10 +71,10 @@ data = yf.download(
     proxy=None
 )
 
-# Plot Closing Price of Query Symbol
 
 
-def price_plot(symbol):
+
+def price_plot1(symbol):
     df = pd.DataFrame(data[symbol].Close)
     df['Date'] = df.index
     plt.fill_between(df.Date, df.Close, color='skyblue', alpha=0.3)
@@ -87,9 +86,22 @@ def price_plot(symbol):
     return st.pyplot()
 
 
-num_company = st.sidebar.slider('Number of Companies', 1, 5)
+def price_plot2(symbol):
+    df = pd.DataFrame(data[symbol].Open)
+    df['Date'] = df.index
+    plt.fill_between(df.Date, df.Open, color='red', alpha=0.3)
+    plt.plot(df.Date, df.Open, color='red', alpha=0.8)
+    plt.xticks(rotation=90)
+    plt.title(symbol, fontweight='bold')
+    plt.xlabel('Date', fontweight='bold')
+    plt.ylabel('opening Price', fontweight='bold')
+    return st.pyplot()
+
+
+num_company = st.sidebar.slider('Number of Companies', 1, 10)
 
 if st.button('Show Plots'):
-    st.header('Stock Closing Price')
+    st.header('Stock Prices')
     for i in list(df_selected_sector.Symbol)[:num_company]:
-        price_plot(i)
+        price_plot1(i)
+        price_plot2(i)
